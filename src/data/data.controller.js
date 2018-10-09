@@ -19,7 +19,8 @@ exports.listDataEntries = async (req, res) => {
                 transactionHistory.push(transaction.metadata);
             });
             let device = asset.data;
-            simplifiedAssets.push({device, transactionHistory});
+            let id = asset.id;
+            simplifiedAssets.push({id, device, transactionHistory});
             assets = simplifiedAssets;
         });
     }
