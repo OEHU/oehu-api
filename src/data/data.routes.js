@@ -21,5 +21,15 @@ module.exports = [
             name: 'Get all transactions',
             description: 'Returns an array containing all the transactions in the BigchainDB.'
         }
-    }
+    },
+    {
+        method: 'GET',
+        path: '/statistics',
+        // validation: dataValidation.listTransactions,
+        handler: dataController.getStatistics,
+        doc: {
+            name: 'Get some cool statistics',
+            description: 'To Be Made.'
+        }
+    },
 ]

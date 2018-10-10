@@ -2,6 +2,9 @@ const axios = require('axios');
 const {conf} = require('mono-core');
 const R = require('ramda');
 
+const oehuMongoDriver = require('./mongoDriver.js');
+const mongoDriver = new oehuMongoDriver();
+
 const VehBigchainDriver = require('./driver.js');
 const vehDriver = new VehBigchainDriver({
     network: 'http://188.166.15.225:9984/api/v1/'
@@ -47,4 +50,14 @@ exports.listTransactions = async (req, res) => {
         return Date.parse(a.timestamp) - Date.parse(b.timestamp);
     });
     res.json(allTransactions);
+}
+
+exports.getStatistics = async (req, res) => {
+    let test = await mongoDriver.test();
+    console.log(test);
+
+    // let statistics = await vehDriver.getStatistics();
+    // statistics = statistics.reverse();
+
+    res.json(test);
 }

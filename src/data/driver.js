@@ -78,11 +78,18 @@ class VehBigchainDriver {
         return updatedAsset;
     }
 
-    // getSimplifiedAssets :: void -> Object
+    // getAssets :: void -> Object
     // Gets all assets from bigchaindb
     async getAssets() {
         let assets = this.orm.models.devices.retrieve();
         return assets;
+    }
+
+    // getStatistics :: void -> Object
+    // Gets all assets from bigchaindb
+    async getStatistics() {
+        let statistics = this.orm.models.devices.find({ occupants: "5" }).retrieve();
+        return statistics;
     }
 
     async burn(_deviceID) {
