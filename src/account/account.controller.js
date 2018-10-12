@@ -27,17 +27,21 @@ exports.createNewAccount = async (req, res) => {
 exports.loginToAccount = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
-    Accounts.get({email: email}).then((account)=>{
-        bcrypt.compare(password, account.hash, function (err, authenticated) {
-            if (authenticated === true) {
-                res.json({
-                    email: account.email,
-                    devices: account.devices
-                });
-            } else {
-                res.statusCode = 401;
-                res.json({message: 'Invalid'})
-            }
-        });
+    Accounts.get({email: email}).then((account)=> {
+        if (account) {
+            bcrypt.compare(password, account.hash, function (err, authenticated) {
+                if (authenticated === true) {
+                    res.json({
+                        email: account.email,
+                        devices: account.devices
+                    });
+                } else {
+                    res.statusCode = 401;
+                    res.json({message: 'Invalid'})
+                }
+            });
+        } else {
+            res.json({message: 'Invalid'})
+        }
     });
 }
