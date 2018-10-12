@@ -80,8 +80,13 @@ class VehBigchainDriver {
 
     // getAssets :: void -> Object
     // Gets all assets from bigchaindb
-    async getAssets() {
-        let assets = this.orm.models.devices.retrieve();
+    async getAssets(deviceId = false) {
+        let assets;
+        if (deviceId) {
+            assets = this.orm.models.devices.retrieve({id: deviceId});
+        } else {
+            assets = this.orm.models.devices.retrieve();
+        }
         return assets;
     }
 

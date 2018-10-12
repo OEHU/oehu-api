@@ -7,7 +7,7 @@ const { findValidation } = require('mono-mongodb') // See https://github.com/ter
 exports.listDataEntries = {
     query: Joi.object().keys({
         raw: Joi.boolean(),
-        deviceId: Joi.string().min(1).alphanum(),
+        deviceId: Joi.string().min(1),
     })
 }
 

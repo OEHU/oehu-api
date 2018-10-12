@@ -11,9 +11,24 @@ const vehDriver = new VehBigchainDriver({
     network: 'http://188.166.15.225:9984/api/v1/'
 });
 
+/**
+ *
+ * @param req (deviceId/raw)
+ * @param res
+ * @returns {Promise<void>}
+ */
 exports.listDataEntries = async (req, res) => {
     let assets = await vehDriver.getAssets();
-    assets = assets.reverse();
+
+    if (req.query.deviceId) {
+        let deviceId = req.query.deviceId;
+        assets = [assets.find((element) => {
+            return element.id === deviceId;
+        })];
+    } else {
+        assets = assets.reverse();
+    }
+
     if (!req.query.raw) {
         let simplifiedAssets = [];
         assets.forEach((asset) => {
