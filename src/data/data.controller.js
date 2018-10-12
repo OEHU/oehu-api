@@ -2,8 +2,9 @@ const axios = require('axios');
 const {conf} = require('mono-core');
 const R = require('ramda');
 
-const oehuMongoDriver = require('./mongoDriver.js');
-const mongoDriver = new oehuMongoDriver();
+
+// const oehuMongoDriver = require('./mongoDriver.js');
+// const mongoDriver = new oehuMongoDriver();
 
 const VehBigchainDriver = require('./driver.js');
 const vehDriver = new VehBigchainDriver({
@@ -60,4 +61,14 @@ exports.getStatistics = async (req, res) => {
     // statistics = statistics.reverse();
 
     res.json(test);
+}
+
+/*
+  Cors middleware
+  This needs to be more strict in production
+ */
+exports.cors = async (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
 }

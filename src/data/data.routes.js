@@ -1,4 +1,5 @@
-const dataValidation = require('./data.validation')
+let cors = require('cors');
+const dataValidation = require('./data.validation');
 const dataController = require('./data.controller');
 
 module.exports = [
@@ -6,7 +7,7 @@ module.exports = [
         method: 'GET',
         path: '/data',
         validation: dataValidation.listDataEntries,
-        handler: dataController.listDataEntries,
+        handler:  [cors(), dataController.listDataEntries],
         doc: {
             name: 'Get all data entries from each device',
             description: 'Returns an array containing objects with "device" information, and a "transactionHistory" array.'
@@ -16,7 +17,7 @@ module.exports = [
         method: 'GET',
         path: '/transactions',
         validation: dataValidation.listTransactions,
-        handler: dataController.listTransactions,
+        handler: [cors(), dataController.listTransactions],
         doc: {
             name: 'Get all transactions',
             description: 'Returns an array containing all the transactions in the BigchainDB.'
@@ -26,7 +27,7 @@ module.exports = [
         method: 'GET',
         path: '/statistics',
         // validation: dataValidation.listTransactions,
-        handler: dataController.getStatistics,
+        handler: [cors(), dataController.getStatistics],
         doc: {
             name: 'Get some cool statistics',
             description: 'To Be Made.'
