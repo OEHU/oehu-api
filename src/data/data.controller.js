@@ -25,6 +25,7 @@ exports.listDataEntries = async (req, res) => {
         assets = [assets.find((element) => {
             return element.id === deviceId;
         })];
+        //todo: return message if id not found
     } else {
         assets = assets.reverse();
     }
@@ -32,14 +33,9 @@ exports.listDataEntries = async (req, res) => {
     if (!req.query.raw) {
         let simplifiedAssets = [];
         assets.forEach((asset) => {
-            let transactionHistory = [];
-            let rawTransactionHistory = asset.transactionHistory;
-            rawTransactionHistory.forEach((transaction) => {
-                transactionHistory.push(transaction.metadata);
-            });
             let device = asset.data;
             let id = asset.id;
-            simplifiedAssets.push({id, device, transactionHistory});
+            simplifiedAssets.push({id, device});
             assets = simplifiedAssets;
         });
     }
@@ -69,13 +65,11 @@ exports.listTransactions = async (req, res) => {
 }
 
 exports.getStatistics = async (req, res) => {
-    let test = await mongoDriver.test();
-    console.log(test);
+    // let test = await mongoDriver.test();
+    // console.log(test);
 
-    // let statistics = await vehDriver.getStatistics();
-    // statistics = statistics.reverse();
 
-    res.json(test);
+    // res.json(test);
 }
 
 /*
