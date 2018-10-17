@@ -1,20 +1,38 @@
 # veh-api
 
-VEH Project API
+This API makes it easy to query one of the OEHU bigchaindb nodes.
+
+The API is part of the OEHU bigger project. Read about the bigger picture [over here](http://github.com/oehu/oehu-documentation).
 
 ## Installation
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
+Now copy ./src/config.example.json to ./config.json & fill in the right mongo connection credentials:
+
+```bash
+cp ./src/config.example.json ./src/config.json
+```
+
 ## Development
+
+Make sure you have a connection to the mongo database. You might have to create a SSL tunnel:
+
+```bash
+ssh root@IP_OF_BIGCHAINDB_NODE -L 27018:localhost:27017
+```
+
+Now run the development environment:
 
 ```bash
 npm run dev
 ```
 
-API server will listen on [http://localhost:8000](http://localhost:8000) & watch for changes to restart.
+The API server will listen on [http://localhost:8000](http://localhost:8000) & watch for changes to restart.
 
 ## Production
 
