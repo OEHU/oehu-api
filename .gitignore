@@ -20,3 +20,4 @@ conf/local.js
 
 # MongoDB
 data/*
+config.json

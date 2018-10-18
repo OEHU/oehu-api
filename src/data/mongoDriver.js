@@ -1,11 +1,6 @@
 /**
  * MongoDB
  */
-// const urlMongo = 'mongodb://188.166.15.225:27017/bigchaindb';
-// const mongoose = require('mongoose');
-// mongoose.connect(urlMongo, {useNewUrlParser: true});
-// let x = require('./models/dataFieldTrigger');
-
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const config = require('../../config.json');
