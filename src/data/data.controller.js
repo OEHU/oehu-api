@@ -2,14 +2,13 @@ const axios = require('axios');
 const {conf} = require('mono-core');
 const R = require('ramda');
 
+const oehuMongoDriver = require('./mongoDriver.js');
+const mongoDriver = new oehuMongoDriver();
 
-// const oehuMongoDriver = require('./mongoDriver.js');
-// const mongoDriver = new oehuMongoDriver();
-
-const VehBigchainDriver = require('./driver.js');
-const vehDriver = new VehBigchainDriver({
-    network: 'http://188.166.15.225:9984/api/v1/'
-});
+// const VehBigchainDriver = require('./driver.js');
+// const vehDriver = new VehBigchainDriver({
+//     network: 'http://188.166.15.225:9984/api/v1/'
+// });
 
 /**
  *
@@ -18,7 +17,7 @@ const vehDriver = new VehBigchainDriver({
  * @returns {Promise<void>}
  */
 exports.listDataEntries = async (req, res) => {
-    let assets = await vehDriver.getAssets();
+    let assets = await mongoDriver.getAssets();
 
     if (req.query.deviceId) {
         let deviceId = req.query.deviceId;
@@ -27,23 +26,29 @@ exports.listDataEntries = async (req, res) => {
         })];
         //todo: return message if id not found
     } else {
-        assets = assets.reverse();
+        //todo: reverse / assets = assets.reverse();
+        assets = assets;
     }
 
     if (!req.query.raw) {
         let simplifiedAssets = [];
-        assets.forEach((asset) => {
-            let device = asset.data;
-            let id = asset.id;
-            simplifiedAssets.push({id, device});
-            assets = simplifiedAssets;
-        });
+        console.log('assets!', assets);
+        for(let key in assets) {
+            let asset = assets[key];
+            console.log('ja')
+        }
+        // assets.forEach((asset) => {
+        //     let device = asset.data;
+        //     let id = asset.id;
+        //     simplifiedAssets.push({id, device});
+        //     assets = simplifiedAssets;
+        // });
     }
     res.json(assets);
 }
 
 exports.listTransactions = async (req, res) => {
-    let assets = await vehDriver.getAssets();
+    let assets = await mongoDriver.getAssets();
     assets = assets.reverse();
 
     //TODO: check if this works, sort by date, implement start/end

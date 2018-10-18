@@ -1,15 +1,23 @@
 /**
  * MongoDB
  */
-const urlMongo = 'mongodb://188.166.15.225:27017/bigchaindb';
-const mongoose = require('mongoose');
-mongoose.connect(urlMongo, {useNewUrlParser: true});
-let x = require('./models/dataFieldTrigger');
+// const urlMongo = 'mongodb://188.166.15.225:27017/bigchaindb';
+// const mongoose = require('mongoose');
+// mongoose.connect(urlMongo, {useNewUrlParser: true});
+// let x = require('./models/dataFieldTrigger');
 
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+const config = require('../../config.json');
+
+const urlMongo = config.urlMongo;
+const dbName = 'bigchain';
 
 class OehuMongoDriver {
 
     constructor(opts) {
+        let self = this;
+
         if (!opts) {
             opts = {};
         }
@@ -18,14 +26,25 @@ class OehuMongoDriver {
         this.collection = null;
 
         MongoClient.connect(urlMongo, function (err, client) {
-            (error) ? console.log(err) : console.log('connected');
+            (err) ? console.log(err) : console.log('MongoClient successfully to server');
 
-            console.log("Connected successfully to server");
-
-            this.db = client.db(dbName);
-            this.collection = this.db.collection('assets');
+            self.db = client.db(dbName);
+            self.collection = self.db.collection('assets');
         });
+    }
 
+    async getAssets(req, res) {
+        let self = this;
+        return new Promise(resolve => {
+            self.collection.find({
+                // ...
+            }).toArray(function (err, res) {
+                assert.equal(err, null);
+                // console.log("Found the following records");
+                // console.log(res);
+                resolve(res);
+            });
+        });
     }
 
     async test() {
