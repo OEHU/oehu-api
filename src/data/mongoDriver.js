@@ -1,8 +1,11 @@
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
+/**
+ * MongoDB
+ */
+const urlMongo = 'mongodb://188.166.15.225:27017/bigchaindb';
+const mongoose = require('mongoose');
+mongoose.connect(urlMongo, {useNewUrlParser: true});
+let x = require('./models/dataFieldTrigger');
 
-const urlMongo = 'mongodb://marijn:marijn@188.166.15.225:27017';
-const dbName = 'bigchain';
 
 class OehuMongoDriver {
 
@@ -26,14 +29,11 @@ class OehuMongoDriver {
     }
 
     async test() {
-        this.collection.find({$text: {$search: 'coffe chocolate two'}})
-        .toArray(function (err, docs) {
-            assert.equal(err, null);
-            console.log("Found the following records");
-            console.log(docs);
-
-            return docs;
-        });
+        let assets = await this.collection.find({id: "id:3b959424:devices:891aa2df-9a28-409b-9902-d3d2040c9d85"});
+        console.log(assets);
+        while (assets.hasNext()) {
+            console.log(assets.next());
+        }
     }
 }
 
