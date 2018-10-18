@@ -1,7 +1,7 @@
 /**
  * MongoDB
  */
-const MongoClient = require('mongodb').MongoClient;
+const {MongoClient, ObjectId} = require('mongodb'); // or ObjectID
 const assert = require('assert');
 const config = require('../../config.json');
 
@@ -52,15 +52,30 @@ class OehuMongoDriver {
         let self = this;
         return new Promise(resolve => {
             let metadata = self.metadataCollection.findOne({"id": id});
-            metadata.then(function(res, err) {
-                resolve(res, err);
+            metadata.then(function(res) {
+                resolve(res);
             })
         });
     }
-    async getTransactions(assetId) {
+    async getTransactions(assetId, limit = 100) {
         let self = this;
         return new Promise(resolve => {
             self.transactionCollection.find({"asset.id": assetId})
+            .sort({"_id": -1})
+            .limit(limit)
+            .toArray(function (err, res) {
+                assert.equal(err, null);
+                resolve(res);
+            });
+        });
+    }
+    async getTransactionFromTimestamp(assetId, timestamp) {
+        let self = this;
+        return new Promise(resolve => {
+            let objectId = Math.floor(timestamp / 1000).toString(16) + "0000000000000000";
+
+            self.transactionCollection.find({"asset.id": assetId, _id: {$gt: ObjectId(objectId)}})
+            .limit(1)
             .toArray(function (err, res) {
                 assert.equal(err, null);
                 resolve(res);

@@ -2,6 +2,7 @@ const axios = require('axios');
 const {conf} = require('mono-core');
 const R = require('ramda');
 
+
 const oehuMongoDriver = require('./mongoDriver.js');
 const mongoDriver = new oehuMongoDriver();
 
@@ -32,8 +33,73 @@ exports.getAssetsWithMetadata = async (req, res) => {
         promises.push(promise);
     });
 
-    Promise.all(promises).then(function() {
+    Promise.all(promises).then(function () {
         res.json(result);
+    });
+}
+exports.getStatistics = async (req, res) => {
+    let assets;
+    let statistics = {
+        devicesConnected: 0,
+        averageUseEnergy: 0,
+        averageGeneratedEnergy: 0,
+        averageUseGas: 0,
+    };
+
+    let deviceId = req.query.deviceId;
+    if (deviceId) {
+        assets = await mongoDriver.getAssets(deviceId)
+    } else {
+        assets = await mongoDriver.getAssets()
+    }
+
+    let d = new Date(); // Today!
+    let yesterday = d.setDate(d.getDate() - 1); // Yesterday!
+
+    statistics.devicesConnected = assets.length;
+    res.json('hi');
+
+    let promises = [];
+    assets.forEach(function (asset) {
+
+        let transactionPastPromise = mongoDriver.getTransactionFromTimestamp(asset.id, yesterday);
+        let transactionNowPromise = mongoDriver.getTransactions(asset.id, 1);
+        let transactionPastMetadataPromise;
+        let transactionNowMetadataPromise;
+
+        transactionPastPromise.then(function (res) {
+            if (!R.isEmpty(res)) {
+                transactionPastMetadataPromise = mongoDriver.getMetadata(res[0].id);
+            }
+        });
+
+        transactionNowPromise.then(function (res) {
+            if (!R.isEmpty(res)) {
+                transactionNowMetadataPromise = mongoDriver.getMetadata(res[0].id)
+            }
+        });
+
+        //Because yay promises
+        let promise = new Promise(resolve => {
+            Promise.all([transactionPastPromise, transactionNowPromise]).then(function () {
+                Promise.all([transactionPastMetadataPromise, transactionNowMetadataPromise]).then(function () {
+                    transactionNowMetadataPromise.then(function (nowRes) {
+                        transactionPastMetadataPromise.then(function (pastRes) {
+                            console.log("_____");
+                            console.log(nowRes);
+                            console.log(pastRes);
+                            console.log("_____");
+                            resolve()
+                        });
+                    });
+                });
+            });
+        });
+        promises.push(promise);
+    });
+
+    Promise.all(promises).then(function () {
+
     });
 }
 /**
@@ -74,14 +140,6 @@ exports.listTransactions = async (req, res) => {
         return Date.parse(a.timestamp) - Date.parse(b.timestamp);
     });
     res.json(allTransactions);
-}
-
-exports.getStatistics = async (req, res) => {
-    // let test = await mongoDriver.test();
-    // console.log(test);
-
-
-    // res.json(test);
 }
 
 /*
