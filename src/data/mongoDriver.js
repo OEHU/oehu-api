@@ -24,61 +24,50 @@ class OehuMongoDriver {
             (err) ? console.log(err) : console.log('MongoClient successfully to server');
 
             self.db = client.db(dbName);
-            self.collection = self.db.collection('assets');
+            self.assetCollection = self.db.collection('assets');
+            self.metadataCollection = self.db.collection('metadata');
+            self.transactionCollection = self.db.collection('transactions');
         });
     }
 
-    async getAssets(req, res) {
+    async getAssets(deviceId = false) {
         let self = this;
+
+        let query;
+        if (deviceId) {
+            query = {"data.id": deviceId}
+        } else {
+            query = {}
+        }
+
         return new Promise(resolve => {
-            self.collection.find({
-                // ...
-            }).toArray(function (err, res) {
+            self.assetCollection.find(query)
+            .toArray(function (err, res) {
                 assert.equal(err, null);
-                // console.log("Found the following records");
-                // console.log(res);
                 resolve(res);
             });
         });
     }
-
-    async test() {
-        let assets = await this.collection.find({id: "id:3b959424:devices:891aa2df-9a28-409b-9902-d3d2040c9d85"});
-        console.log(assets);
-        while (assets.hasNext()) {
-            console.log(assets.next());
-        }
+    async getMetadata(id) {
+        let self = this;
+        return new Promise(resolve => {
+            let metadata = self.metadataCollection.findOne({"id": id});
+            metadata.then(function(res, err) {
+                resolve(res, err);
+            })
+        });
+    }
+    async getTransactions(assetId) {
+        let self = this;
+        return new Promise(resolve => {
+            self.transactionCollection.find({"asset.id": assetId})
+            .toArray(function (err, res) {
+                assert.equal(err, null);
+                resolve(res);
+            });
+        });
     }
 }
 
 module.exports = OehuMongoDriver;
-
-
-// Match any of the search terms: 'word1 word2 word3'
-
-
-// Using AND operator: ' "word1" "word2" '
-// collection.find({ $text: { $search: ' "05/01/2016" "04:00" ' } } )
-//     .toArray(function(err, docs) {
-//         assert.equal(err, null);
-//         console.log("Found the following records");
-//         console.log(docs);
-//     });
-
-// Search for phrase: '"\"phrase to search\""'
-// collection.find({ $text: { $search: '"\"coffee shop\""' } } )
-//     .toArray(function(err, docs) {
-//         assert.equal(err, null);
-//         console.log("Found the following records");
-//         console.log(docs);
-//     });
-
-// Exclude assets with value: '"coffee -shop"'
-// collection.find({ $text: { $search: '"coffee -shop"' }})
-//     .toArray(function(err, docs) {
-//         assert.equal(err, null);
-//         console.log("Found the following records");
-//         console.log(docs);
-//     });
-
 

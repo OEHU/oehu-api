@@ -10,6 +10,29 @@ const mongoDriver = new oehuMongoDriver();
 //     network: 'http://188.166.15.225:9984/api/v1/'
 // });
 
+exports.getAssetsWithMetadata = async (req, res) => {
+    let result = [];
+    let assets;
+
+    let deviceId = req.query.deviceId;
+    if (deviceId) {
+        assets = await mongoDriver.getAssets(deviceId)
+    } else {
+        assets = await mongoDriver.getAssets()
+    }
+    await assets.forEach(function(asset) {
+        mongoDriver.getMetadata(asset.id).then((res, err) => {
+            result.push({
+                deviceId: asset.id,
+                metadata: res.metadata
+            });
+        });
+    });
+
+    setTimeout(function(){
+        res.json(result);
+        }, 1000);
+}
 /**
  *
  * @param req (deviceId/raw)
@@ -17,32 +40,13 @@ const mongoDriver = new oehuMongoDriver();
  * @returns {Promise<void>}
  */
 exports.listDataEntries = async (req, res) => {
-    let assets = await mongoDriver.getAssets();
 
-    if (req.query.deviceId) {
-        let deviceId = req.query.deviceId;
-        assets = [assets.find((element) => {
-            return element.id === deviceId;
-        })];
-        //todo: return message if id not found
-    } else {
-        //todo: reverse / assets = assets.reverse();
-        assets = assets;
-    }
 
     if (!req.query.raw) {
         let simplifiedAssets = [];
-        console.log('assets!', assets);
         for(let key in assets) {
             let asset = assets[key];
-            console.log('ja')
         }
-        // assets.forEach((asset) => {
-        //     let device = asset.data;
-        //     let id = asset.id;
-        //     simplifiedAssets.push({id, device});
-        //     assets = simplifiedAssets;
-        // });
     }
     res.json(assets);
 }

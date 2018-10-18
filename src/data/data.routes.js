@@ -33,4 +33,14 @@ module.exports = [
             description: 'To Be Made.'
         }
     },
+    {
+        method: 'GET',
+        path: '/devices',
+        validation: dataValidation.getAssetsWithMetadata,
+        handler: [cors(), dataController.getAssetsWithMetadata],
+        doc: {
+            name: 'Get objects with deviceId and metadata',
+            description: ''
+        }
+    },
 ]

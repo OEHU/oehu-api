@@ -10,6 +10,11 @@ exports.listDataEntries = {
         deviceId: Joi.string().min(1),
     })
 }
+exports.getAssetsWithMetadata = {
+    query: Joi.object().keys({
+        deviceId: Joi.string().min(1),
+    })
+}
 
 exports.listTransactions = {
 	query: Joi.object().keys({
