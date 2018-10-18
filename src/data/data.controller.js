@@ -11,6 +11,8 @@ const mongoDriver = new oehuMongoDriver();
 //     network: 'http://188.166.15.225:9984/api/v1/'
 // });
 
+const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+
 exports.getAssetsWithMetadata = async (req, res) => {
     let result = [];
     let assets;
@@ -45,6 +47,9 @@ exports.getStatistics = async (req, res) => {
         averageGeneratedEnergy: 0,
         averageUseGas: 0,
     };
+    let averageUseEnergy = [];
+    let averageGeneratedEnergy = [];
+    let averageUseGas = [];
 
     let deviceId = req.query.deviceId;
     if (deviceId) {
@@ -52,54 +57,56 @@ exports.getStatistics = async (req, res) => {
     } else {
         assets = await mongoDriver.getAssets()
     }
-
-    let d = new Date(); // Today!
-    let yesterday = d.setDate(d.getDate() - 1); // Yesterday!
-
     statistics.devicesConnected = assets.length;
-    res.json('hi');
+
+
+    let d = new Date();
+    let yesterday = d.setDate(d.getDate() - 1);
 
     let promises = [];
     assets.forEach(function (asset) {
-
-        let transactionPastPromise = mongoDriver.getTransactionFromTimestamp(asset.id, yesterday);
-        let transactionNowPromise = mongoDriver.getTransactions(asset.id, 1);
-        let transactionPastMetadataPromise;
-        let transactionNowMetadataPromise;
-
-        transactionPastPromise.then(function (res) {
-            if (!R.isEmpty(res)) {
-                transactionPastMetadataPromise = mongoDriver.getMetadata(res[0].id);
-            }
-        });
-
-        transactionNowPromise.then(function (res) {
-            if (!R.isEmpty(res)) {
-                transactionNowMetadataPromise = mongoDriver.getMetadata(res[0].id)
-            }
-        });
-
-        //Because yay promises
         let promise = new Promise(resolve => {
-            Promise.all([transactionPastPromise, transactionNowPromise]).then(function () {
-                Promise.all([transactionPastMetadataPromise, transactionNowMetadataPromise]).then(function () {
-                    transactionNowMetadataPromise.then(function (nowRes) {
-                        transactionPastMetadataPromise.then(function (pastRes) {
-                            console.log("_____");
-                            console.log(nowRes);
-                            console.log(pastRes);
-                            console.log("_____");
-                            resolve()
-                        });
+            let transactionPastPromise = mongoDriver.getTransactionFromTimestamp(asset.id, yesterday);
+            let transactionNowPromise = mongoDriver.getTransactions(asset.id, 1);
+            let transactionPastMetadataPromise;
+            let transactionNowMetadataPromise;
+
+            Promise.all([transactionPastPromise, transactionNowPromise]).then(function (values) {
+                if (values[0].length === 1 && values[1].length === 1) {
+                    transactionPastMetadataPromise = mongoDriver.getMetadata(values[0][0].id);
+                    transactionNowMetadataPromise = mongoDriver.getMetadata(values[1][0].id);
+
+                    Promise.all([transactionPastMetadataPromise, transactionNowMetadataPromise]).then(function (values) {
+                        if (values[0].metadata.electricityReceived !== undefined && values[1].metadata.electricityReceived !== undefined) {
+                            let totalElectricityReceivedPast = values[0].metadata.electricityReceived.total;
+                            let totalElectricityReceivedNow = values[1].metadata.electricityReceived.total;
+                            averageUseEnergy.push(totalElectricityReceivedNow - totalElectricityReceivedPast);
+
+                            let totalElectricityGeneratedPast = values[0].metadata.electricityDelivered.total;
+                            let totalElectricityGeneratedNow = values[1].metadata.electricityDelivered.total;
+                            averageGeneratedEnergy.push(totalElectricityGeneratedNow - totalElectricityGeneratedPast);
+
+                            let totalGasReceivedPast = values[0].metadata.gasReceived;
+                            let totalGasReceivedNow = values[1].metadata.gasReceived;
+                            averageUseGas.push(totalGasReceivedNow - totalGasReceivedPast);
+                            resolve();
+                        } else {
+                            resolve();
+                        }
                     });
-                });
+                } else {
+                    resolve();
+                }
             });
         });
         promises.push(promise);
     });
 
     Promise.all(promises).then(function () {
-
+        statistics.averageUseEnergy = average(averageUseEnergy);
+        statistics.averageGeneratedEnergy = average(averageGeneratedEnergy);
+        statistics.averageUseEnergy = average(averageUseGas);
+        res.json(statistics);
     });
 }
 /**
@@ -141,6 +148,8 @@ exports.listTransactions = async (req, res) => {
     });
     res.json(allTransactions);
 }
+
+
 
 /*
   Cors middleware
