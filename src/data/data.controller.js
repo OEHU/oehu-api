@@ -20,18 +20,21 @@ exports.getAssetsWithMetadata = async (req, res) => {
     } else {
         assets = await mongoDriver.getAssets()
     }
-    await assets.forEach(function(asset) {
-        mongoDriver.getMetadata(asset.id).then((res, err) => {
+
+    let promises = [];
+    assets.forEach(function (asset) {
+        let promise = mongoDriver.getMetadata(asset.id).then((res, err) => {
             result.push({
                 deviceId: asset.id,
                 metadata: res.metadata
             });
         });
+        promises.push(promise);
     });
 
-    setTimeout(function(){
+    Promise.all(promises).then(function() {
         res.json(result);
-        }, 1000);
+    });
 }
 /**
  *
@@ -44,7 +47,7 @@ exports.listDataEntries = async (req, res) => {
 
     if (!req.query.raw) {
         let simplifiedAssets = [];
-        for(let key in assets) {
+        for (let key in assets) {
             let asset = assets[key];
         }
     }

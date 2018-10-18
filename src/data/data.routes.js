@@ -30,7 +30,7 @@ module.exports = [
         handler: [cors(), dataController.getStatistics],
         doc: {
             name: 'Get some cool statistics',
-            description: 'To Be Made.'
+            description: ''
         }
     },
     {
