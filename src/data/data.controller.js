@@ -118,7 +118,7 @@ exports.getStatistics = async (req, res) => {
     Promise.all(promises).then(function () {
         statistics.averageUseEnergy = average(averageUseEnergy);
         statistics.averageGeneratedEnergy = average(averageGeneratedEnergy);
-        statistics.averageUseEnergy = average(averageUseGas);
+        statistics.averageUseGas = average(averageUseGas);
         res.json(statistics);
     });
 }
@@ -129,8 +129,6 @@ exports.getStatistics = async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.listDataEntries = async (req, res) => {
-
-
     if (!req.query.raw) {
         let simplifiedAssets = [];
         for (let key in assets) {
