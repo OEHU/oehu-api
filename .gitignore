@@ -1,3 +1,5 @@
+config.json
+
 # Dependencies
 node_modules
 
@@ -20,4 +22,3 @@ conf/local.js
 
 # MongoDB
 data/*
-config.json

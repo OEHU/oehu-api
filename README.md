@@ -50,8 +50,12 @@ npm test
 
 ____
 
-Created this cron on server:
+Create this cron on the server to automatically start a SSH tunnel to a bigchaindb node:
 
     crontab -e
 
     * * * * * nc -z localhost 27018 || ssh -N -L 27018:localhost:27017 root@188.166.15.225 &
+
+If you want to manually start the application using `pm2`, do the following:
+
+    pm2 start npm -- start
