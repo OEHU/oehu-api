@@ -4,6 +4,11 @@ const accountController = require('./account.controller');
 
 module.exports = [
     {
+        method: 'ALL',
+        path: '/account/register',
+        handler: cors(),
+    },
+    {
         method: 'POST',
         path: '/account/register',
         validation: accountValidation.createNewAccount,
@@ -22,15 +27,5 @@ module.exports = [
             name: 'Login to your account',
             description: 'Returns object with email and array with devices'
         }
-    },
-    // {
-    //     method: 'POST',
-    //     path: '/account/addDevice',
-    //     validation: accountValidation.loginToAccount,
-    //     handler: accountController.loginToAccount,
-    //     doc: {
-    //         name: 'Login to your account',
-    //         description: 'Returns object with email and array with devices'
-    //     }
-    // },
+    }
 ]
