@@ -19,6 +19,11 @@ module.exports = [
         }
     },
     {
+        method: 'ALL',
+        path: '/account/login',
+        handler: cors(),
+    },
+    {
         method: 'POST',
         path: '/account/login',
         validation: accountValidation.loginToAccount,
