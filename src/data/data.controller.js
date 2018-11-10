@@ -18,20 +18,20 @@ exports.getAssetsWithMetadata = async (req, res) => {
         assets = await mongoDriver.getAssets()
     }
 
-    let promises = [];
-    assets.forEach(function (asset) {
-        let promise = mongoDriver.getMetadata(asset.id).then((res, err) => {
+    // Loop over assets
+    for (const asset of assets) {
+        let transaction = await mongoDriver.getTransactions(asset.id, 1);
+        if(transaction[0] && transaction[0].id) {
+            let metadata = await mongoDriver.getMetadata(transaction[0].id);
             result.push({
                 deviceId: asset.id,
-                metadata: res.metadata
+                transaction: transaction,
+                metadata: metadata
             });
-        });
-        promises.push(promise);
-    });
+        }
+    }
 
-    Promise.all(promises).then(function () {
-        res.json(result);
-    });
+    res.json(result);
 }
 exports.getStatistics = async (req, res) => {
     let assets;
@@ -129,6 +129,9 @@ exports.getStatistics = async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.listDataEntries = async (req, res) => {
+    let assets = await mongoDriver.getAssets();
+    assets = assets.reverse();
+
     if (!req.query.raw) {
         let simplifiedAssets = [];
         for (let key in assets) {
