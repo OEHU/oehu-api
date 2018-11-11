@@ -26,7 +26,7 @@ module.exports = [
     {
         method: 'GET',
         path: '/statistics',
-        // validation: dataValidation.listTransactions,
+        validation: dataValidation.listTransactions,
         handler: [cors(), dataController.getStatistics],
         doc: {
             name: 'Get some cool statistics',

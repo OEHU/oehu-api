@@ -132,7 +132,7 @@ exports.listDataEntries = async (req, res) => {
     let assets = await mongoDriver.getAssets();
     assets = assets.reverse();
 
-    if (!req.query.raw) {
+    if ( ! req.query.raw) {
         let simplifiedAssets = [];
         for (let key in assets) {
             let asset = assets[key];
@@ -141,21 +141,54 @@ exports.listDataEntries = async (req, res) => {
     res.json(assets);
 }
 
+// getTransactionHistoryForAsset :: Int -> Object
+const getTransactionHistoryForAsset = async function (assetId) {
+
+    let ret = [];
+
+    // Get last 100 transactions
+    let transactions = await mongoDriver.getTransactions(assetId, 10);
+
+    // Get metadata
+    for (var i = 0; i <= transactions.length - 1; i++) {
+        let transaction = transactions[i];
+        let metadata = await mongoDriver.getMetadata(transactions[i].id);
+        transaction.metadata = metadata;
+        // Only process metadata if there are actual values
+        if (metadata && metadata.metadata && metadata.metadata.electricityReceived !== undefined) { 
+            ret.push(transaction);
+        }
+    }
+
+    return ret;
+}
+
 exports.listTransactions = async (req, res) => {
-    let assets = await mongoDriver.getAssets();
+    let deviceId = req.query.deviceId;
+    let assets = await mongoDriver.getAssets(deviceId ? deviceId : false);
     assets = assets.reverse();
 
     //TODO: check if this works, sort by date, implement start/end
     let allTransactions = [];
-    assets.forEach((asset) => {
-        let transactions = asset.transactionHistory;
+    for (var i = 0; i <= assets.length - 1; i++) {
+        let transactions = await getTransactionHistoryForAsset(assets[i].id);
 
-        if (!req.query.raw) {
+        if ( req.query.raw) {
             transactions.forEach((transaction) => {
-                allTransactions.push(transaction.metadata);
+                allTransactions.push(transaction);
             });
         }
-    });
+        // In non-raw version: only return metadata
+        else {
+            transactions.forEach((transaction) => {
+                transaction = {
+                    id: transaction.id,
+                    metadata: transaction.metadata
+                }
+                allTransactions.push(transaction);
+            });
+        }
+    };
 
     allTransactions = allTransactions.sort(function (a, b) {
         return Date.parse(a.timestamp) - Date.parse(b.timestamp);

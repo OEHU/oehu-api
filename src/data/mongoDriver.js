@@ -33,12 +33,8 @@ class OehuMongoDriver {
     async getAssets(deviceId = false) {
         let self = this;
 
-        let query;
-        if (deviceId) {
-            query = {"data.id": deviceId}
-        } else {
-            query = {}
-        }
+        // Filter on deviceId if deviceId is given
+        let query = deviceId ? {"data.id": deviceId} : {};
 
         return new Promise(resolve => {
             self.assetCollection.find(query)

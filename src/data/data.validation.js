@@ -17,7 +17,9 @@ exports.getAssetsWithMetadata = {
 }
 
 exports.listTransactions = {
-	query: Joi.object().keys({
+    query: Joi.object().keys({
+        raw: Joi.boolean(),
+        deviceId: Joi.string().min(1),
 		start: Joi.date(),
         end: Joi.date(),
 	})
