@@ -43,12 +43,12 @@ class VehBigchainDriver {
                 lastUpdate: 0,
                 electricityReceived: {
                     total: 0,
-                    tarrif1: 0,
+                    tariff1: 0,
                     tariff2: 0
                 },
                 electricityDelivered: {
                     total: 0,
-                    tarrif1: 0,
+                    tariff1: 0,
                     tariff2: 0
                 },
                 gasReceived: 0
