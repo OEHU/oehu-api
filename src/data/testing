@@ -1,0 +1,48 @@
+db.getCollection('transactions').aggregate([{
+              $project: {
+                _id: 1,
+                metadata: 1,
+                day: {
+                  "$dayOfMonth": "$metadata.metadata.lastUpdate"
+                },
+                month: {
+                  "$month": "$metadata.metadata.lastUpdate"
+                },
+                year: {
+                  "$year": "$metadata.metadata.lastUpdate"
+                }
+              }
+            }, {
+              $project: {
+                _id: 1,
+                metadata: 1,
+                data: 1,
+                eventDate: {
+                  $concat: [{
+                      $substr: ["$year", 0, 4]
+                    },
+                    "-", {
+                      $substr: ["$month", 0, 2]
+                    },
+                    "-", {
+                      $substr: ["$day", 0, 2]
+                    }
+                  ]
+                }
+              }
+            }, {
+              $group: {
+                _id: "$metadata.metadata.lastUpdate",
+                eventDate: {
+                  $first: "$metadata.metadata.lastUpdate"
+                },
+                metadata: {
+                  $first: '$metadata'
+                }
+              }
+            }, {
+              $sort: {
+                _id: 1
+              }
+            }])
+            
