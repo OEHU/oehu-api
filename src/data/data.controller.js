@@ -142,12 +142,12 @@ exports.listDataEntries = async (req, res) => {
 }
 
 // getTransactionHistoryForAsset :: Int -> Object
-const getTransactionHistoryForAsset = async function (assetId) {
+const getTransactionHistoryForAsset = async function (assetId, precission) {
 
     let ret = [];
 
-    // Get last 100 transactions
-    let transactions = await mongoDriver.getTransactions(assetId, 10);
+    // Get last X transactions
+    let transactions = await mongoDriver.getTransactions(assetId, 24, precission);
 
     // Get metadata
     for (var i = 0; i <= transactions.length - 1; i++) {
@@ -165,13 +165,15 @@ const getTransactionHistoryForAsset = async function (assetId) {
 
 exports.listTransactions = async (req, res) => {
     let deviceId = req.query.deviceId;
+    let precission = req.query.precission;
+
     let assets = await mongoDriver.getAssets(deviceId ? deviceId : false);
     assets = assets.reverse();
 
     //TODO: check if this works, sort by date, implement start/end
     let allTransactions = [];
     for (var i = 0; i <= assets.length - 1; i++) {
-        let transactions = await getTransactionHistoryForAsset(assets[i].id);
+        let transactions = await getTransactionHistoryForAsset(assets[i].id, precission);
 
         if ( req.query.raw) {
             transactions.forEach((transaction) => {

@@ -2,6 +2,7 @@
  * MongoDB
  */
 const {MongoClient, ObjectId} = require('mongodb'); // or ObjectID
+const moment = require('moment');
 const assert = require('assert');
 const config = require('../../config.json');
 
@@ -53,17 +54,85 @@ class OehuMongoDriver {
             })
         });
     }
-    async getTransactions(assetId, limit = 100) {
+    async getTransactions(assetId, limit = 100, presission) {
+
         let self = this;
         return new Promise(resolve => {
-            self.transactionCollection.find({"asset.id": assetId})
-            .sort({"_id": -1})
-            .limit(limit)
-            .toArray(function (err, res) {
-                assert.equal(err, null);
-                resolve(res);
-            });
+            // Basic projection: https://stackoverflow.com/a/38416467
+            // Timestamp conversion: https://stackoverflow.com/a/39274563
+            // Check https://dzone.com/articles/mongodb-aggregation-queries-for-counts-per-day-par
+            self.transactionCollection.aggregate([{
+              $project: {
+                _id: 1,
+                metadata: 1,
+                $toDate: "$metadata.metadata.lastUpdate"
+              },
+              $project: {
+                _id: 1,
+                metadata: 1,
+                day: {
+                  "$dayOfMonth": "$metadata.metadata.lastUpdate"
+                },
+                month: {
+                  "$month": "$metadata.metadata.lastUpdate"
+                },
+                year: {
+                  "$year": "$metadata.metadata.lastUpdate"
+                }
+              }
+            }, {
+              $project: {
+                _id: 1,
+                metadata: 1,
+                data: 1,
+                eventDate: {
+                  $concat: [{
+                      $substr: ["$year", 0, 4]
+                    },
+                    "-", {
+                      $substr: ["$month", 0, 2]
+                    },
+                    "-", {
+                      $substr: ["$day", 0, 2]
+                    }
+                  ]
+                }
+              }
+            }, {
+              $group: {
+                id: "$metadata.metadata.lastUpdate",
+                eventDate: {
+                  $first: "$metadata.metadata.lastUpdate"
+                },
+                metadata: {
+                  $first: '$metadata'
+                }
+              }
+            }, {
+              $sort: {
+                id: 1
+              }
+            }])
+        })
+        .toArray(function (err, res) {
+            assert.equal(err, null);
+            console.log('res')
+            console.log(res)//should be {_id: .., metadata: {}}
+            resolve(res);
         });
+
+        // let self = this;
+        // return new Promise(resolve => {
+        //     self.transactionCollection.find({
+        //         "asset.id": assetId
+        //     })
+        //     .sort({"_id": -1})
+        //     .limit(limit)
+        //     .toArray(function (err, res) {
+        //         assert.equal(err, null);
+        //         resolve(res);
+        //     });
+        // });
     }
     async getTransactionFromTimestamp(assetId, timestamp) {
         let self = this;
