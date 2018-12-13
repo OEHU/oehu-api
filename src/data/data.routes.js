@@ -35,6 +35,16 @@ module.exports = [
     },
     {
         method: 'GET',
+        path: '/statistics/dashboard',
+        validation: dataValidation.listTransactions,
+        handler: [cors(), dataController.getDashboardStatistics],
+        doc: {
+            name: 'Returns dashboard statistics',
+            description: ''
+        }
+    },
+    {
+        method: 'GET',
         path: '/devices',
         validation: dataValidation.getAssetsWithMetadata,
         handler: [cors(), dataController.getAssetsWithMetadata],

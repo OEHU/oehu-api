@@ -1,11 +1,11 @@
 const axios = require('axios');
-const {conf} = require('mono-core');
+const { conf } = require('mono-core');
 var moment = require('moment');
 
 const oehuMongoDriver = require('./mongoDriver.js');
 const mongoDriver = new oehuMongoDriver();
 
-const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
 exports.getAssetsWithMetadata = async (req, res) => {
     let result = [];
@@ -21,7 +21,7 @@ exports.getAssetsWithMetadata = async (req, res) => {
     // Loop over assets
     for (const asset of assets) {
         let transaction = await mongoDriver.getTransactions(asset.id, 1);
-        if(transaction[0] && transaction[0].id) {
+        if (transaction[0] && transaction[0].id) {
             let metadata = await mongoDriver.getMetadata(transaction[0].id);
             result.push({
                 deviceId: asset.id,
@@ -99,7 +99,7 @@ exports.getStatistics = async (req, res) => {
 
                             // Count device if this was active in the last 24 hours
                             // Only count device if total kWh use > 0.01 kWh
-                            if(totalElectricityReceivedNow > 0.01)
+                            if (totalElectricityReceivedNow > 0.01)
                                 statistics.devicesConnected += 1;
 
                             resolve();
@@ -122,6 +122,18 @@ exports.getStatistics = async (req, res) => {
         res.json(statistics);
     });
 }
+
+exports.getDashboardStatistics = async (req, res) => {
+    //TODO 
+    //Get statistics from mongoDB
+    let statistics = {
+        yAxis: [12, 10, 13, 13, 13, 20, 23, 26, 28, 30, 28, 26, 28, 30, 26, 24, 22, 20, 12, 11, 11, 13, 12, 11],
+        xAxis: ["00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
+
+    };
+    res.json(statistics);
+
+}
 /**
  *
  * @param req (deviceId/raw)
@@ -132,7 +144,7 @@ exports.listDataEntries = async (req, res) => {
     let assets = await mongoDriver.getAssets();
     assets = assets.reverse();
 
-    if ( ! req.query.raw) {
+    if (!req.query.raw) {
         let simplifiedAssets = [];
         for (let key in assets) {
             let asset = assets[key];
@@ -155,7 +167,7 @@ const getTransactionHistoryForAsset = async function (assetId) {
         let metadata = await mongoDriver.getMetadata(transactions[i].id);
         transaction.metadata = metadata;
         // Only process metadata if there are actual values
-        if (metadata && metadata.metadata && metadata.metadata.electricityReceived !== undefined) { 
+        if (metadata && metadata.metadata && metadata.metadata.electricityReceived !== undefined) {
             ret.push(transaction);
         }
     }
@@ -173,7 +185,7 @@ exports.listTransactions = async (req, res) => {
     for (var i = 0; i <= assets.length - 1; i++) {
         let transactions = await getTransactionHistoryForAsset(assets[i].id);
 
-        if ( req.query.raw) {
+        if (req.query.raw) {
             transactions.forEach((transaction) => {
                 allTransactions.push(transaction);
             });
