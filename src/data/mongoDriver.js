@@ -78,6 +78,11 @@ class OehuMongoDriver {
             });
         });
     }
+    async getDateFromId(objectId) {
+        return new Promise(resolve => {
+            resolve(ObjectId(objectId).getTimestamp());
+        });
+    }
 }
 
 module.exports = OehuMongoDriver;

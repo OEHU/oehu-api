@@ -124,10 +124,12 @@ exports.getStatistics = async (req, res) => {
 }
 
 exports.getDashboardStatistics = async (req, res) => {
+    let promises = [];
     let timestamps = [];
     let transactions = [];
     let metadata = [];
     let assets;
+    let result = [];
 
     let deviceId = req.query.deviceId;
     if (deviceId) {
@@ -141,41 +143,42 @@ exports.getDashboardStatistics = async (req, res) => {
         timestamps.push(moment().subtract(i, 'hours').valueOf());
     }
 
-    timestamps.forEach(function(timestamp) {
+    timestamps.forEach(function (timestamp) {
         transactions.push(mongoDriver.getTransactionFromTimestamp(assets[0].id, timestamp))
     });
 
-    Promise.all(transactions).then(function () {
-        console.log(transactions);
-        transactions.forEach(function(transaction) {
-            transaction.then(function(t) {
-                if (t[0]) {
-                    metadata.push(mongoDriver.getMetadata(t[0].id));
-                } else {
-                    console.log('Empty');
-                }
-            });
-
+    Promise.all(transactions).then(transactions => {
+        transactions.forEach(transaction => {
+            if (transaction[0]) {
+                metadata.push(mongoDriver.getMetadata(transaction[0].id));
+            }
         });
 
-        Promise.all(metadata).then(function () {
-            metadata.forEach(function(metadataPoint) {
-                metadataPoint.then(function(m) {
-                    console.log(m);
+        Promise.all(metadata).then(metadataPoints => {
+            metadataPoints.forEach(metadataPoint => {
+
+                let promise = new Promise(resolve => {
+                    mongoDriver.getDateFromId(metadataPoint._id).then(res => {
+                        let date = res;
+                        let energy = metadataPoint.metadata.electricityReceived.total;
+                        resolve([energy, date]);
+                    });
                 });
-                // metadata.push(mongoDriver.getMetadata(transaction.id));
+                promises.push(promise);
             });
-        });
+
+            Promise.all(promises).then(results => {
+                console.log(results);
+            });
+        })
     });
 
-
-
-    //     let statistics = {
-    //     yAxis: [12, 10, 13, 13, 13, 20, 23, 26, 28, 30, 28, 26, 28, 30, 26, 24, 22, 20, 12, 11, 11, 13, 12, 11],
-    //     xAxis: ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
-    //
-    // };
-    // res.json(statistics);
+//     let statistics = {
+//     yAxis: [12, 10, 13, 13, 13, 20, 23, 26, 28, 30, 28, 26, 28, 30, 26, 24, 22, 20, 12, 11, 11, 13, 12, 11],
+//     xAxis: ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
+//
+// };
+// res.json(statistics);
 
 }
 /**
