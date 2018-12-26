@@ -1,6 +1,7 @@
 const axios = require('axios');
 const {conf} = require('mono-core');
 var moment = require('moment');
+const R = require('ramda');
 
 const oehuMongoDriver = require('./mongoDriver.js');
 const mongoDriver = new oehuMongoDriver();
@@ -136,49 +137,54 @@ exports.getDashboardStatistics = async (req, res) => {
         assets = await mongoDriver.getAssets(deviceId)
     } else {
         assets = await mongoDriver.getAssets()
-        //quit or something
     }
 
-    for (let i = 0; i < 25; i++) {
-        timestamps.push(moment().subtract(i, 'hours').valueOf());
+    for (let i = 0; i < 8; i++) {
+        timestamps.push(moment().subtract(i, 'days').valueOf());
     }
 
     timestamps.forEach(function (timestamp) {
         transactions.push(mongoDriver.getTransactionFromTimestamp(assets[0].id, timestamp))
     });
 
-    Promise.all(transactions).then(transactions => {
+    await Promise.all(transactions).then(transactions => {
         transactions.forEach(transaction => {
             if (transaction[0]) {
                 metadata.push(mongoDriver.getMetadata(transaction[0].id));
             }
         });
-
-        Promise.all(metadata).then(metadataPoints => {
-            metadataPoints.forEach(metadataPoint => {
-
-                let promise = new Promise(resolve => {
-                    mongoDriver.getDateFromId(metadataPoint._id).then(res => {
-                        let date = res;
-                        let energy = metadataPoint.metadata.electricityReceived.total;
-                        resolve([energy, date]);
-                    });
-                });
-                promises.push(promise);
-            });
-
-            Promise.all(promises).then(results => {
-                console.log(results);
-            });
-        })
     });
 
-//     let statistics = {
-//     yAxis: [12, 10, 13, 13, 13, 20, 23, 26, 28, 30, 28, 26, 28, 30, 26, 24, 22, 20, 12, 11, 11, 13, 12, 11],
-//     xAxis: ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
-//
-// };
-// res.json(statistics);
+    await Promise.all(metadata).then(metadataPoints => {
+        metadataPoints.forEach(metadataPoint => {
+
+            let promise = new Promise(resolve => {
+                mongoDriver.getDateFromId(metadataPoint._id).then(res => {
+                    let date = res;
+                    let energy = metadataPoint.metadata.electricityReceived.total;
+                    resolve([energy, date]);
+                });
+            });
+            promises.push(promise);
+        });
+    })
+
+    let leResults;
+    await Promise.all(promises).then(results => {
+        leResults = results;
+    });
+
+    // Create statistics
+    let statistics = {'yAxis': [], 'xAxis': []};
+    for (var i = 0; i < leResults.length; i++) {
+        // Labels (dates)
+        statistics.xAxis.push( leResults[i][1] );
+        // Values (kWh's)
+        statistics.yAxis.push( leResults[i][0] );
+    }
+
+    // Return statistics
+    res.json(statistics);
 
 }
 /**
