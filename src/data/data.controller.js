@@ -139,14 +139,17 @@ exports.getDashboardStatistics = async (req, res) => {
         assets = await mongoDriver.getAssets()
     }
 
+    // Populate timestamps for last 7 days
     for (let i = 0; i < 8; i++) {
         timestamps.push(moment().subtract(i, 'days').valueOf());
     }
 
+    // Get 1 transaction for every day
     timestamps.forEach(function (timestamp) {
         transactions.push(mongoDriver.getTransactionFromTimestamp(assets[0].id, timestamp))
     });
 
+    // Get metadata (kwh+m3) for every transactions
     await Promise.all(transactions).then(transactions => {
         transactions.forEach(transaction => {
             if (transaction[0]) {
@@ -155,9 +158,9 @@ exports.getDashboardStatistics = async (req, res) => {
         });
     });
 
+    // Populate data
     await Promise.all(metadata).then(metadataPoints => {
         metadataPoints.forEach(metadataPoint => {
-
             let promise = new Promise(resolve => {
                 mongoDriver.getDateFromId(metadataPoint._id).then(res => {
                     let date = res;
@@ -179,8 +182,8 @@ exports.getDashboardStatistics = async (req, res) => {
     for (var i = 0; i < leResults.length; i++) {
         // Labels (dates)
         statistics.xAxis.push( leResults[i][1] );
-        // Values (kWh's)
-        statistics.yAxis.push( leResults[i][0] );
+        // Values (kWh's). Not cumulative, but the diff
+        statistics.yAxis.push( leResults[i][0] - leResults[0][0] );
     }
 
     // Return statistics
