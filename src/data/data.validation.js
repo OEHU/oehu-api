@@ -25,6 +25,13 @@ exports.listTransactions = {
 	})
 }
 
+exports.getDashboardStatistics = {
+    query: Joi.object().keys({
+        deviceId: Joi.string().min(1),
+        days: Joi.number(),
+	})
+}
+
 // exports.updateTodo = {
 // 	params: Joi.object().keys({
 // 		id: Joi.string().length(24).alphanum()

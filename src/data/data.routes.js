@@ -36,7 +36,7 @@ module.exports = [
     {
         method: 'GET',
         path: '/statistics/dashboard',
-        validation: dataValidation.listTransactions,
+        validation: dataValidation.getDashboardStatistics,
         handler: [cors(), dataController.getDashboardStatistics],
         doc: {
             name: 'Returns dashboard statistics',

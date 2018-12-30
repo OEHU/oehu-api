@@ -130,7 +130,6 @@ exports.getDashboardStatistics = async (req, res) => {
     let transactions = [];
     let metadata = [];
     let assets;
-    let result = [];
 
     let deviceId = req.query.deviceId;
     if (deviceId) {
