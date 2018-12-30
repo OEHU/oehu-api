@@ -139,8 +139,14 @@ exports.getDashboardStatistics = async (req, res) => {
         assets = await mongoDriver.getAssets()
     }
 
+    let days = req.query.days;
+    if (R.isEmpty(days) || !R.is(Number, days)) {
+        days = 7;
+    }
+
     // Populate timestamps for last 7 days
-    for (let i = 0; i < 8; i++) {
+    days = days+1;
+    for (let i = 0; i < days; i++) {
         timestamps.push(moment().subtract(i, 'days').valueOf());
     }
 
@@ -182,7 +188,7 @@ exports.getDashboardStatistics = async (req, res) => {
     let statistics = {'yAxis': [], 'xAxis': []};
     for (var i = 0; i < leResults.length; i++) {
         // Labels (dates)
-        statistics.xAxis.push( moment(leResults[i][1]).format('DD-MM'));
+        statistics.xAxis.push( moment(leResults[i][1]).format('DD-MM HH:mm'));
         // Values (kWh's). Not cumulative, but the diff
         statistics.yAxis.push( leResults[i][0] - leResults[0][0] );
     }
