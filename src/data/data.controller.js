@@ -143,6 +143,11 @@ exports.getDashboardStatistics = async (req, res) => {
         days = 7;
     }
 
+    let data = req.data.data;
+    if (R.isEmpty(data)) {
+        data = 'kwh';
+    }
+
     // Populate timestamps for last 7 days
     days = days+1;
     for (let i = 0; i < days; i++) {
@@ -169,8 +174,17 @@ exports.getDashboardStatistics = async (req, res) => {
             let promise = new Promise(resolve => {
                 mongoDriver.getDateFromId(metadataPoint._id).then(res => {
                     let date = res;
-                    let energy = metadataPoint.metadata.electricityReceived.total;
-                    resolve([energy, date]);
+                    let value;
+
+                    if (data = 'kwh') {
+                        value = metadataPoint.metadata.electricityReceived.total;
+                    } else if (data = 'gas') {
+                        value = metadataPoint.metadata.gasReceived;
+                    } else if (data = 'kwdDelivered') {
+                        value = metadataPoint.metadata.electricityDelivered.total;
+                    }
+
+                    resolve([value, date]);
                 });
             });
             promises.push(promise);

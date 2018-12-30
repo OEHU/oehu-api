@@ -29,6 +29,7 @@ exports.getDashboardStatistics = {
     query: Joi.object().keys({
         deviceId: Joi.string().min(1),
         days: Joi.number(),
+        data: Joi.string(),
 	})
 }
 
