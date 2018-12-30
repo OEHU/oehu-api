@@ -174,14 +174,15 @@ exports.getDashboardStatistics = async (req, res) => {
 
     let leResults;
     await Promise.all(promises).then(results => {
-        leResults = results;
+        leResults = R.reverse(results);
+        console.log(leResults);
     });
 
     // Create statistics
     let statistics = {'yAxis': [], 'xAxis': []};
     for (var i = 0; i < leResults.length; i++) {
         // Labels (dates)
-        statistics.xAxis.push( leResults[i][1] );
+        statistics.xAxis.push( moment(leResults[i][1]).format('DD-MM'));
         // Values (kWh's). Not cumulative, but the diff
         statistics.yAxis.push( leResults[i][0] - leResults[0][0] );
     }
