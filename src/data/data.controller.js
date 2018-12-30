@@ -143,7 +143,7 @@ exports.getDashboardStatistics = async (req, res) => {
         days = 7;
     }
 
-    let data = req.data.data;
+    let data = req.query.data;
     if (R.isEmpty(data)) {
         data = 'kwh';
     }
@@ -176,11 +176,11 @@ exports.getDashboardStatistics = async (req, res) => {
                     let date = res;
                     let value;
 
-                    if (data = 'kwh') {
+                    if (data === 'kwh') {
                         value = metadataPoint.metadata.electricityReceived.total;
-                    } else if (data = 'gas') {
+                    } else if (data === 'gas') {
                         value = metadataPoint.metadata.gasReceived;
-                    } else if (data = 'kwdDelivered') {
+                    } else if (data === 'kwhDelivered') {
                         value = metadataPoint.metadata.electricityDelivered.total;
                     }
 
