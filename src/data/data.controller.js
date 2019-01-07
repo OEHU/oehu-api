@@ -199,11 +199,13 @@ exports.getDashboardStatistics = async (req, res) => {
 
     // Create statistics
     let statistics = {'yAxis': [], 'xAxis': []};
-    for (var i = 0; i < leResults.length; i++) {
-        // Labels (dates)
-        statistics.xAxis.push( moment(leResults[i][1]).format('DD-MM HH:mm'));
-        // Values (kWh's). Not cumulative, but the diff
-        statistics.yAxis.push( leResults[i][0] - leResults[0][0] );
+    for (let i = 0; i < leResults.length; i++) {
+        if (i !== 0) {
+            // Labels (dates)
+            statistics.xAxis.push(moment(leResults[i][1]).format('DD-MM HH:mm'));
+            // Values (kWh's). Not cumulative, but the diff
+            statistics.yAxis.push(leResults[i][0] - leResults[i - 1][0]);
+        }
     }
 
     // Return statistics
