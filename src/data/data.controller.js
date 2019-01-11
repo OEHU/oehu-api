@@ -149,15 +149,13 @@ exports.getDashboardStatistics = async (req, res) => {
     }
 
     // Populate timestamps for last 7 days
-    days = days+1;
-    let now = moment().valueOf()
-    
+    days = days+1;    
     for (let i = 0; i < days; i++) {
-        let startOfDay = moment().subtract(i, 'days').startOf('day').format("DD/MM/YYYY HH:mm:ss")
-        let endOfDay = moment().subtract(i, 'days').endOf('day').format("DD/MM/YYYY HH:mm:ss")
-        let difference = moment.utc(moment(endOfDay,"DD/MM/YYYY HH:mm:ss").diff(moment(startOfDay,"DD/MM/YYYY HH:mm:ss"))).format("HH:mm:ss")
+        // let startOfDay = moment().subtract(i,'days').startOf('day')
+        // console.log(moment(startOfDay).format("DD/MM/YYYY HH:mm:ss"))
+        // ToDO Check if this is correct
+        timestamps.push(moment().subtract(i,'days').startOf('day'))
         
-        timestamps.push(moment().subtract(i,'days').valueOf())
     }
 
     // Get 1 transaction for every day
@@ -210,9 +208,9 @@ exports.getDashboardStatistics = async (req, res) => {
 
             // xAxis format example
             let xAxis = moment(leResults[i][1]).startOf('day').format('DD-MM HH:mm') + ' - ' + moment(leResults[i][1]).endOf('day').format('DD-MM HH:mm')
-            // statistics.xAxis.push(xAxis);
+            statistics.xAxis.push(xAxis);
 
-            statistics.xAxis.push(moment(leResults[i][1]).format('DD-MM HH:mm'));
+            // statistics.xAxis.push(moment(leResults[i][1]).format('DD-MM HH:mm'));
             // Values (kWh's). Not cumulative, but the diff
             statistics.yAxis.push(leResults[i][0] - leResults[i - 1][0]);
         }
