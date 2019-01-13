@@ -265,13 +265,13 @@ exports.listTransactions = async (req, res) => {
     let assets = await mongoDriver.getAssets(deviceId ? deviceId : false);
     assets = assets.reverse();
 
-    //TODO: check if this works, sort by date, implement start/end
     let allTransactions = [];
     for (var i = 0; i <= assets.length - 1; i++) {
         let transactions = await getTransactionHistoryForAsset(assets[i].id);
 
         if (req.query.raw) {
             transactions.forEach((transaction) => {
+                transaction.deviceId = assets[i].data.id;
                 allTransactions.push(transaction);
             });
         }
@@ -279,6 +279,7 @@ exports.listTransactions = async (req, res) => {
         else {
             transactions.forEach((transaction) => {
                 transaction = {
+                    deviceId: assets[i].data.id,
                     id: transaction.id,
                     metadata: transaction.metadata
                 }
