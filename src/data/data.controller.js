@@ -239,12 +239,12 @@ exports.listDataEntries = async (req, res) => {
 }
 
 // getTransactionHistoryForAsset :: Int -> Object
-const getTransactionHistoryForAsset = async function (assetId) {
+const getTransactionHistoryForAsset = async function (assetId, limit) {
 
     let ret = [];
 
     // Get last 100 transactions
-    let transactions = await mongoDriver.getTransactions(assetId, 10);
+    let transactions = await mongoDriver.getTransactions(assetId, limit);
 
     // Get metadata
     for (var i = 0; i <= transactions.length - 1; i++) {
@@ -262,12 +262,19 @@ const getTransactionHistoryForAsset = async function (assetId) {
 
 exports.listTransactions = async (req, res) => {
     let deviceId = req.query.deviceId;
+
+    let limit = 0;
+    if (req.query.limit) {
+        limit = req.query.limit;
+    } else {
+        limit = 10
+    }
     let assets = await mongoDriver.getAssets(deviceId ? deviceId : false);
     assets = assets.reverse();
 
     let allTransactions = [];
     for (var i = 0; i <= assets.length - 1; i++) {
-        let transactions = await getTransactionHistoryForAsset(assets[i].id);
+        let transactions = await getTransactionHistoryForAsset(assets[i].id, limit);
 
         if (req.query.raw) {
             transactions.forEach((transaction) => {
