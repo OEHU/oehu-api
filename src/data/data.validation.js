@@ -24,7 +24,11 @@ exports.listTransactions = {
         end: Joi.date(),
 	})
 }
-
+exports.getTransactionsCount = {
+    query: Joi.object().keys({
+        deviceId: Joi.string().min(1).required(),
+    })
+}
 exports.getDashboardStatistics = {
     query: Joi.object().keys({
         deviceId: Joi.string().min(1),

@@ -295,6 +295,12 @@ exports.listTransactions = async (req, res) => {
     res.json(allTransactions);
 }
 
+exports.getTransactionsCount = async (req, res) => {
+    let deviceId = req.query.deviceId;
+    let assets = await mongoDriver.getAssets(deviceId ? deviceId : false);
+    let transactionsCount = await mongoDriver.getTransactionsCount(assets[0]);
+    res.json({count: transactionsCount});
+}
 
 /*
   Cors middleware

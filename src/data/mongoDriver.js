@@ -65,6 +65,18 @@ class OehuMongoDriver {
             });
         });
     }
+    async getTransactionsCount(asset) {
+        let self = this;
+        return new Promise(resolve => {
+            self.transactionCollection.countDocuments({$or:[
+                    {"asset.id": asset.id},
+                    {"asset.data.id": asset.data.id}
+                ]}, function(err, res) {
+                assert.equal(err, null);
+                resolve(res);
+            });
+        });
+    }
     async getTransactionFromTimestamp(assetId, timestamp) {
         let self = this;
         return new Promise(resolve => {

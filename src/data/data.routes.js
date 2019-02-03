@@ -7,7 +7,7 @@ module.exports = [
         method: 'GET',
         path: '/data',
         validation: dataValidation.listDataEntries,
-        handler:  [cors(), dataController.listDataEntries],
+        handler: [cors(), dataController.listDataEntries],
         doc: {
             name: 'Get all data entries from each device',
             description: 'Returns an array containing objects with "device" information, and a "transactionHistory" array.'
@@ -21,6 +21,16 @@ module.exports = [
         doc: {
             name: 'Get all transactions',
             description: 'Returns an array containing all the transactions in the BigchainDB.'
+        }
+    },
+    {
+        method: 'GET',
+        path: '/transactionsCount',
+        validation: dataValidation.getTransactionsCount,
+        handler: [cors(), dataController.getTransactionsCount],
+        doc: {
+            name: 'Get number of transactions for a deviceId',
+            description: 'Returns the number of transactions in the BigchainDB of a asset id'
         }
     },
     {
